@@ -60,7 +60,7 @@ class RideShareForm extends React.Component {
         event.preventDefault();
         Axios.post('/register', this.state)
             .then((response) => {
-                console.log(response.data);
+                this.props.eventOnClick()
             })
     }
 
