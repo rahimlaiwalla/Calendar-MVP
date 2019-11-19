@@ -1,5 +1,6 @@
 import React from 'react';
 import Axios from 'axios';
+import Map from './Map.jsx';
 
 class RideShareForm extends React.Component {
     constructor(props) {
@@ -12,6 +13,7 @@ class RideShareForm extends React.Component {
             add_number: '',
             address: '',
             zip_code: '',
+            coordinates: {},
         }
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.handlePassengerChange = this.handlePassengerChange.bind(this);
@@ -58,15 +60,17 @@ class RideShareForm extends React.Component {
 
     onDriverSubmit(event) {
         event.preventDefault();
-        Axios.post('/register', this.state)
+        Axios.post('/registerDriver', this.state)
             .then((response) => {
+                console.log(response.data)
+                this.setState({coordinates: response.data})
                 this.props.eventOnClick()
             })
     }
 
     onPassengerSubmit(event) {
         event.preventDefault();
-        Axios.post('/register', this.state)
+        Axios.post('/registerPassenger', this.state)
             .then((response) => {
                 this.props.eventOnClick()
             })
@@ -128,7 +132,12 @@ class RideShareForm extends React.Component {
                     {this.props.usersArray[0].map((driver) => {
                         // console.log(driver.name);
                         // console.log('RIDE SHARE DAY ID: ', this.state.day_id);
-                        return (<div>{driver.name}</div>)
+                        return (
+                            <div>
+                                <div>{driver.name}</div>
+                                <Map coordinates={this.state.coordinates}/>
+                            </div>
+                        )
                     })}
                 </div>
                 <div>{'Passengers: '}
