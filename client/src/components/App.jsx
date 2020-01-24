@@ -55,7 +55,7 @@ class App extends React.Component {
     eventOnClick(event) {
         if(this.state.view === 'calendar'){
             this.setState({view: 'details', singleEvent: event}, () => {
-                // console.log(this.state.singleEvent)
+                console.log(this.state.singleEvent)
                 Axios.post('/riders', {day_id: this.state.singleEvent.id})
                     .then((response) => {
                         this.setState({singleEventUsersArray: response.data}, () => {

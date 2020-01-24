@@ -1,6 +1,7 @@
 import React from 'react';
 import Axios from 'axios';
-import Map from './Map.jsx';
+// import Map from './Map.jsx';
+import MapObject from './Map.jsx';
 
 class RideShareForm extends React.Component {
     constructor(props) {
@@ -63,7 +64,7 @@ class RideShareForm extends React.Component {
         Axios.post('/registerDriver', this.state)
             .then((response) => {
                 console.log(response.data)
-                this.setState({coordinates: response.data})
+                // this.setState({coordinates: response.data})
                 this.props.eventOnClick()
             })
     }
@@ -129,13 +130,16 @@ class RideShareForm extends React.Component {
                     )}
                 </form>
                 <div>{'Drivers: '}
+                    {/* {console.log('Drivers: ', this.props.usersArray[0])} */}
                     {this.props.usersArray[0].map((driver) => {
-                        // console.log(driver.name);
+                        console.log('driver from form.jsx: ', driver);
                         // console.log('RIDE SHARE DAY ID: ', this.state.day_id);
                         return (
                             <div>
                                 <div>{driver.name}</div>
-                                <Map coordinates={this.state.coordinates}/>
+                                {/* <Map coordinates={this.state.coordinates}/> */}
+                                <div className='map'></div>
+                                <MapObject latitude={driver.latitude} longitude={driver.longitude} number={driver.add_number} address={driver.address} zipCode={driver.zip_code}/>
                             </div>
                         )
                     })}

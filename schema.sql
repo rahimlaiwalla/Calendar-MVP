@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS;
+DROP DATABASE IF EXISTS ride_share_calendar;
 
 CREATE DATABASE ride_share_calendar;
 
@@ -42,7 +42,9 @@ CREATE TABLE userInfo (
     no_of_passengers INT,
     add_number INT NOT NULL,
     address TEXT NOT NULL,
-    zip_code INT NOT NULL
+    zip_code INT NOT NULL,
+    longitude FLOAT(53) NOT NULL,
+    latitude FLOAT(53) NOT NULL
 );
 
 
@@ -59,8 +61,8 @@ COPY january(day, event_name)
 FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/january.csv' DELIMITER ',' CSV;
 
 
-insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'Rahim Laiwalla', 'driver', 3, 543, 'Howard St.', 94105);
-insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN2 LN2', 'passenger', null, 543, 'Howard St.', 94105);
-insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN3 LN3', 'passenger', null, 44, 'Tehama.', 94105);
+-- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'Rahim Laiwalla', 'driver', 3, 543, 'Howard St.', 94105);
+-- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN2 LN2', 'passenger', null, 543, 'Howard St.', 94105);
+-- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN3 LN3', 'passenger', null, 44, 'Tehama.', 94105);
 
 

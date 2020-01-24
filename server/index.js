@@ -1,6 +1,7 @@
 const express  = require('express');
 const bodyparser = require('body-parser');
 const db = require('../database/index.js');
+const config = require('../config.js')
 const cors = require('cors');
 const Axios = require('axios');
 
@@ -22,6 +23,7 @@ app.get('/events', (req, res) => {
        if(err){
            res.send(err)
        } else {
+        //  console.log('/events data.rows: ', data.rows);
         locationInfo.weekday = data.rows[0].weekday_start_time;
         locationInfo.friday = data.rows[0].friday_start_time;
         locationInfo.weekend = data.rows[0].weekend_start_time;
@@ -83,40 +85,73 @@ app.post('/riders', (req, res) => {
             res.send(err)
         } else {
             let array = [[], []];
+            
             data.rows.forEach((user) =>{
                 if(user.status === 'driver'){
                     array[0].push(user);
+                    
                 } else{
                     array[1].push(user);
                 }
             })
-            // console.log(array)
+            // console.log('data.rows: ', data.rows)
+            // console.log('Array from /riders: ', array)
             res.send(array)
         }
     })
 })
 
-app.post('/registerDriver', (req, res) => {
-    let registrar = req.body
-    queryString = `insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code});`
-    db.query(queryString, (err, data) => {
-        if(err){
-            res.send(err)
-        } else {
-            // console.log(req.body)
-            let add_num = registrar.add_number;
-            let address = registrar.address;
-            let zipCode = registrar.zip_code;
-            let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${add_num}+${address},+${zipCode}&key=AIzaSyCYHsqqwzRnCe4U5shMrr-dxikyOsbRqEs`
-            console.log(url)
-            Axios.get(url)
-                .then((response) => {
-                    console.log(response.data.results[0].geometry.location);
-                    res.send(response.data.results[0].geometry.location)
-                })
+// app.post('/registerDriver', (req, res) => {
+//     let registrar = req.body
+//     queryString = `insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code});`
+//     db.query(queryString, (err, data) => {
+//         if(err){
+//             res.send(err)
+//         } else {
+//             // console.log(req.body)
+//             let add_num = registrar.add_number;
+//             let address = registrar.address;
+//             let zipCode = registrar.zip_code;
+//             //gets coordinates from inputted address
+//             let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${add_num}+${address},+${zipCode}&key=${config.geocodeAPI_Key}`
+//             console.log(url)
+//             Axios.get(url)
+//                 .then((response) => {
+//                     console.log(response.data.results[0].geometry.location);
+//                     res.send(response.data.results[0].geometry.location)
+//                 })
         
-        }
-    })
+//         }
+//     })
+// })
+
+app.post('/registerDriver', (req, res) => {
+  let registrar = req.body
+  // console.log(req.body)
+  let add_num = registrar.add_number;
+  let address = registrar.address;
+  let zipCode = registrar.zip_code;
+  let latitude;
+  let longitude;
+  //gets coordinates from inputted address
+  let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${add_num}+${address},+${zipCode}&key=${config.geocodeAPI_Key}`
+  // console.log(url)
+  Axios.get(url)
+      .then((response) => {
+          // console.log(response.data.results[0].geometry.location);
+          // res.send(response.data.results[0].geometry.location)
+          latitude = response.data.results[0].geometry.location.lat;
+          longitude = response.data.results[0].geometry.location.lng;
+          
+          queryString = `insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code, latitude, longitude) values (${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code}, ${latitude}, ${longitude});`
+          db.query(queryString, (err, data) => {
+              if(err){
+                res.send(err)
+              } else {
+                res.send('driver inserted into db.')
+              }
+          })
+      })
 })
 
 
