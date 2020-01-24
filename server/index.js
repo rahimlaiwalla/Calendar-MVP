@@ -101,30 +101,6 @@ app.post('/riders', (req, res) => {
     })
 })
 
-// app.post('/registerDriver', (req, res) => {
-//     let registrar = req.body
-//     queryString = `insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code});`
-//     db.query(queryString, (err, data) => {
-//         if(err){
-//             res.send(err)
-//         } else {
-//             // console.log(req.body)
-//             let add_num = registrar.add_number;
-//             let address = registrar.address;
-//             let zipCode = registrar.zip_code;
-//             //gets coordinates from inputted address
-//             let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${add_num}+${address},+${zipCode}&key=${config.geocodeAPI_Key}`
-//             console.log(url)
-//             Axios.get(url)
-//                 .then((response) => {
-//                     console.log(response.data.results[0].geometry.location);
-//                     res.send(response.data.results[0].geometry.location)
-//                 })
-        
-//         }
-//     })
-// })
-
 app.post('/registerDriver', (req, res) => {
   let registrar = req.body
   // console.log(req.body)
