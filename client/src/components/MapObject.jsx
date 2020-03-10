@@ -15,7 +15,7 @@ function MapObject(props) {
       }         
     return(
         <script src={`https://maps.googleapis.com/maps/api/js?key=${config.geocodeAPI_Key}&callback=${initMap}`}
-    async defer></script>
+    async defer ></script>
     )
 
 }

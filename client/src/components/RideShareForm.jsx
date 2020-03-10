@@ -2,19 +2,23 @@ import React from 'react';
 import Axios from 'axios';
 // import Map from './Map.jsx';
 import MapObject from './Map.jsx';
+import CarInfo from './CarInfo.jsx';
 
 class RideShareForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             day_id: this.props.day_id,
-            name: '',
+            name: this.props.username,
+            userId: this.props.userId,
             driver: 'driver',
             passengers: 0,
             add_number: '',
             address: '',
             zip_code: '',
             coordinates: {},
+            usersArray: this.props.usersArray,
+            // mouseOverMessages: false,
         }
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.handlePassengerChange = this.handlePassengerChange.bind(this);
@@ -24,6 +28,8 @@ class RideShareForm extends React.Component {
         this.onChangeZip = this.onChangeZip.bind(this);
         this.onDriverSubmit = this.onDriverSubmit.bind(this);
         this.onPassengerSubmit = this.onPassengerSubmit.bind(this);
+        // this.mouseOverMessages = this.mouseOverMessages.bind(this);
+        // this.mouseLeaveMessages = this.mouseLeaveMessages.bind(this);
     }
 
     handleSelectChange(event) {
@@ -61,7 +67,7 @@ class RideShareForm extends React.Component {
 
     onDriverSubmit(event) {
         event.preventDefault();
-        Axios.post('/registerDriver', this.state)
+        Axios.post(`/registerDriver/${this.state.userId}`, this.state)
             .then((response) => {
                 console.log(response.data)
                 // this.setState({coordinates: response.data})
@@ -71,23 +77,34 @@ class RideShareForm extends React.Component {
 
     onPassengerSubmit(event) {
         event.preventDefault();
-        Axios.post('/registerPassenger', this.state)
+        Axios.post(`/registerPassenger/${this.state.userId}`, this.state)
             .then((response) => {
+                console.log(response.data)
                 this.props.eventOnClick()
             })
     }
+
+    // mouseOverMessages(){
+    //   this.setState({mouseOverMessages: true});
+    // }
+
+    // mouseLeaveMessages(){
+    //   this.setState({mouseOverMessages: false});
+    // }
 
 
     render() {
 
         return(
             <div>
+                <h5>{this.state.name}</h5>
+                {console.log('this.state rideshareform: ', this.state)}
                 <h1>Ride Share Form</h1>
                 <form>
-                    <label>
+                    {/* <label>
                         {'Name: '} 
                         <input type="text" value={this.state.name} onChange={this.onChangeName}/>
-                    </label>
+                    </label> */}
                     <select value={this.state.driver} onChange={this.handleSelectChange}>
                         {/* {console.log(this.state.driver)} */}
                         <option value='driver'>Driver</option>
@@ -129,27 +146,62 @@ class RideShareForm extends React.Component {
                         </div>
                     )}
                 </form>
-                <div>{'Drivers: '}
+                {/* <div>{'Drivers: '} */}
                     {/* {console.log('Drivers: ', this.props.usersArray[0])} */}
-                    {this.props.usersArray[0].map((driver) => {
-                        console.log('driver from form.jsx: ', driver);
-                        // console.log('RIDE SHARE DAY ID: ', this.state.day_id);
-                        return (
-                            <div>
-                                <div>{driver.name}</div>
+                    {/* {this.props.usersArray[0].map((driver) => { */}
+                        {/* console.log('driver from form.jsx: ', driver); */}
+                        {/* // console.log('RIDE SHARE DAY ID: ', this.state.day_id); */}
+                        {/* return ( */}
+                            {/* <div> */}
+                                {/* <div>{driver.name}</div> */}
                                 {/* <Map coordinates={this.state.coordinates}/> */}
-                                <div className='map'></div>
-                                <MapObject latitude={driver.latitude} longitude={driver.longitude} number={driver.add_number} address={driver.address} zipCode={driver.zip_code}/>
-                            </div>
-                        )
-                    })}
-                </div>
-                <div>{'Passengers: '}
-                    {this.props.usersArray[1].map((passenger) => {
-                        // console.log(passenger.name);
-                        return (<div>{passenger.name}</div>)
-                    })}
+                                {/* <div className='map'></div> */}
+                                {/* <MapObject latitude={driver.latitude} longitude={driver.longitude} number={driver.add_number} address={driver.address} zipCode={driver.zip_code}/> */}
+                            {/* </div> */}
+                        {/* ) */}
+                    {/* })} */}
+                {/* </div> */}
+                {/* <div>{'Passengers: '} */}
+                    {/* {this.props.usersArray[1].map((passenger) => { */}
+                        {/* // console.log(passenger.name); */}
+                        {/* return (<div>{passenger.name}</div>) */}
+                    {/* })} */}
 
+                {/* </div> */}
+                <div style={{marginTop: 20}}>
+                  <div><b>Cars:</b></div>
+                    {this.props.groupsArray.map( group => {
+                      return(
+                        // <div style={{border: '1px solid black', width: 600, marginBottom: 10, flex: 1, flexDirection: 'row'}}>
+                        //   <div style={{width: 400, flexDirection: 'column'}}>
+                        //     <b>{'Driver: '}</b>
+                        //     <div>{group.driver.name}</div>
+                        //     <MapObject latitude={group.driver.latitude} longitude={group.driver.longitude} number={group.driver.add_number} address={group.driver.address} zipCode={group.driver.zip_code}/>
+
+                        //     <div>
+                        //       <b>Passengers:</b>
+                        //       {group.passenger.map( pass => {
+                        //         return(
+                        //           <div>{pass.name}</div>
+                        //         )
+                        //       })}
+                        //     </div>
+                        //   </div>
+                        //   <div style={{width: 600}} onMouseEnter={this.mouseOverMessages} onMouseLeave={this.mouseLeaveMessages}><b>Messages:</b>
+                        //       {this.state.mouseOverMessages
+                        //       ? (
+                        //         <form>
+                        //           <input type="text"></input>
+                        //         </form>
+                        //       )
+                        //     : (
+                        //       null
+                        //     )}
+                        //   </div>
+                        // </div>
+                        <CarInfo username={this.state.name} group={group} day_id={this.state.day_id}/>
+                      )
+                    })}
                 </div>
             </div>
         )

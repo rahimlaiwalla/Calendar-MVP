@@ -32,25 +32,40 @@ class App extends React.Component {
                 allDay: false
             }],
             location: 'Alameda',
-            view: 'calendar',
+            view: 'login',
             singleEvent: {},
             singleEventUsersArray: [],
+            singleEventGroupArray: [],
+            username: '',
+            password: '',
+            userId: 0,
         }
         this.eventOnClick = this.eventOnClick.bind(this);
         this.rideShareOnClick = this.rideShareOnClick.bind(this);
         this.getEvents = this.getEvents.bind(this);
+        this.login = this.login.bind(this);
+        this.usernameOnChange = this.usernameOnChange.bind(this);
+        this.passwordOnChange = this.passwordOnChange.bind(this);
     }
 
     componentDidMount() {
-        this.getEvents();
+        // this.getEvents();
     }
 
+    // getEvents() {
+    //     Axios.get('/events')
+    //         .then((response) => {
+    //             this.setState({events: response.data});
+    //         })
+    // }
+
+    //getEvents using id in api
     getEvents() {
-        Axios.get('/events')
-            .then((response) => {
-                this.setState({events: response.data});
-            })
-    }
+      Axios.get(`/events/${this.state.userId}`)
+          .then((response) => {
+              this.setState({events: response.data});
+          })
+  }
 
     eventOnClick(event) {
         if(this.state.view === 'calendar'){
@@ -58,32 +73,77 @@ class App extends React.Component {
                 console.log(this.state.singleEvent)
                 Axios.post('/riders', {day_id: this.state.singleEvent.id})
                     .then((response) => {
-                        this.setState({singleEventUsersArray: response.data}, () => {
-                            // console.log('STATE USER ARRAY', this.state.singleEventUsersArray)
+                        this.setState({singleEventUsersArray: response.data.array, singleEventGroupArray: response.data.groups}, () => {
+                            console.log('STATE GROUP ARRAY', this.state.singleEventGroupArray)
                         })
                     })
             });
         } else {
             Axios.post('/riders', {day_id: this.state.singleEvent.id})
             .then((response) => {
-                this.setState({singleEventUsersArray: response.data}, () => {
-                    // console.log('STATE USER ARRAY', this.state.singleEventUsersArray)
+                this.setState({singleEventUsersArray: response.data.array, singleEventGroupArray: response.data.groups}, () => {
+                    // console.log('STATE Group ARRAY', this.state.singleEventGroupArray)
                 })
             })
         }
 
     }
 
+    login(event) {
+      let username = this.state.username;
+      let password = this.state.password;
+      Axios.post('/login', {username, password})
+        .then( response => {
+          if(response.data.login_id){
+            this.setState({view: 'calendar', userId: response.data.login_id})
+            // console.log('RESPONSE.DATA FROM LOGIN: ', response.data.login_id)
+          } else if(!response.data.login_id){
+            alert('WRONG USERNAME OR PASSWORD')
+          }
+          // console.log('RESPONSE.DATA FROM LOGIN: ', response.data)
+          this.getEvents();
+        })
+        event.preventDefault();
+    }
+
+    usernameOnChange(event) {
+      this.setState({username: event.target.value});
+    }
+
+    passwordOnChange(event) {
+      this.setState({password: event.target.value});
+    }
+
     rideShareOnClick() {
-        this.setState({view: 'rideShare'})
+      this.setState({view: 'rideShare'})
     }
 
     render () {
-        if(this.state.view === 'calendar') {
+        if(this.state.view === 'login'){
+          return(
+            <div>
+              <h1>Login Page</h1>
+              <form onSubmit={this.login}>
+                <label>
+                  {'Username   '}
+                  <input type="text" value={this.state.username} onChange={this.usernameOnChange}></input>
+                </label>
+                <label>
+                  {'     Password   '}
+                  <input type="text" value={this.state.password} onChange={this.passwordOnChange}></input>
+                </label>
+                <label>
+                  <input type="submit" value="Submit"></input>
+                </label>
+              </form>
+            </div>
+          )
+        } else if(this.state.view === 'calendar') {
             return(
             <div className="App">
                 <div>
-                    <h1>{'MVP Event Calendar and Ride Share App'}</h1>
+                <h5 align="left">{this.state.username}</h5>
+                <h1>{'MVP Event Calendar and Ride Share App'}</h1>
                 </div>
                 <Calendar
                 localizer={localizer}
@@ -102,7 +162,7 @@ class App extends React.Component {
                 <DetailsPage singleEvent={this.state.singleEvent} location={this.state.location} rideShareOnClick={this.rideShareOnClick}/>
             )
         } else if(this.state.view === 'rideShare'){
-            return <RideShareForm usersArray={this.state.singleEventUsersArray} day_id={this.state.singleEvent.id} eventOnClick={this.eventOnClick}/>
+            return <RideShareForm usersArray={this.state.singleEventUsersArray} groupsArray={this.state.singleEventGroupArray} day_id={this.state.singleEvent.id} eventOnClick={this.eventOnClick} username={this.state.username} userId={this.state.userId}/>
         }
     }
 }

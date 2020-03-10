@@ -34,8 +34,18 @@ CREATE TABLE january (
     event_name TEXT
 );
 
+CREATE TABLE login (
+  login_id SERIAL PRIMARY KEY,
+  username TEXT NOT NULL,
+  password TEXT NULL
+);
+
 CREATE TABLE userInfo (
-    userId SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    userId INT NOT NULL
+      REFERENCES login(login_id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
     day_id INT NOT NULL,
     name TEXT NOT NULL,
     status TEXT NOT NULL,
@@ -65,4 +75,9 @@ FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/january.csv' DELI
 -- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN2 LN2', 'passenger', null, 543, 'Howard St.', 94105);
 -- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN3 LN3', 'passenger', null, 44, 'Tehama.', 94105);
 
-
+-- insert into login (username, password) values ('User3', 'User3');
+-- insert into login (username, password) values ('User4', 'User4');
+-- insert into login (username, password) values ('User5', 'User5');
+-- insert into login (username, password) values ('User6', 'User6');
+-- insert into login (username, password) values ('User7', 'User7');
+-- insert into login (username, password) values ('User8', 'User8');

@@ -15,7 +15,7 @@ app.use(cors());
 
 app.use(express.static(__dirname + '/../client/dist'));
 
-app.get('/events', (req, res) => {
+app.get('/events/:id', (req, res) => {
     let id = 1;
     const locationInfo = {};
     let novemberArray = [];
@@ -78,6 +78,48 @@ app.get('/events', (req, res) => {
     })
 });
 
+app.get('/messages/:id/:driverName', (req, res) => {
+  // console.log('req.params get request messages api: ', req.params);
+  // res.send('messages api called')
+
+  db.query(`select message from messages where day_id = ${req.params.id} and driver_username = '${req.params.driverName}'`, (err, data) => {
+    if(err){
+      res.send(err)
+    } else {
+      console.log('data from messages query: ', data.rows)
+      res.send(data.rows);
+    }
+  })
+})
+
+app.post('/messages/:id/:driverName', (req, res) => {
+  db.query(`update messages set message = '${req.body.message}' where day_id = ${req.params.id} and driver_username = '${req.params.driverName}'`, (err, data) => {
+    if(err){
+      res.send(err);
+    } else {
+      db.query(`select message from messages where day_id = ${req.params.id} and driver_username = '${req.params.driverName}'`, (err, data) => {
+        if(err){
+          res.send(err);
+        } else {
+          res.send(data.rows);
+        }
+      })
+    }
+  })
+})
+
+app.post('/login', (req, res) => {
+  // exists syntax: select login_id from login where exists (select 1 from login where username = '${req.body.username}')
+  db.query(`select login_id from login where username = '${req.body.username}'`, (err, data) => {
+    if(err){
+      res.send(err);
+    } else {
+      // console.log(data.rows[0].login_id);
+      res.send(data.rows[0]);
+    }
+  })
+})
+
 app.post('/riders', (req, res) => {
     // console.log(req.body)
     db.query(`select * from userInfo where day_id = ${req.body.day_id}`, (err, data) => {
@@ -94,14 +136,37 @@ app.post('/riders', (req, res) => {
                     array[1].push(user);
                 }
             })
-            // console.log('data.rows: ', data.rows)
-            // console.log('Array from /riders: ', array)
-            res.send(array)
+            console.log('data.rows: ', data.rows)
+            console.log('Array from /riders: ', array)
+            // place passengers in driver groups and make drivers groups
+            let groups = [];
+            array[0].forEach( driver => {
+              let group = {};
+              group['driver'] = driver;
+              group['passenger'] = [];
+              groups.push(group);
+            })
+            if(groups.length > 0){
+              let j = 0;
+              for(let i = 0; i < array[1].length; i++){
+                if(j === groups.length - 1){
+                  groups[j].passenger.push(array[1][i]);
+                  j = 0;
+                } else {
+                  groups[j].passenger.push(array[1][i]);
+                  j++;
+                }
+              }
+            }
+            
+            let sendObj = {array: array, groups: groups};
+            console.log('SENDOBJ: ', sendObj);
+            res.send(sendObj);
         }
     })
 })
 
-app.post('/registerDriver', (req, res) => {
+app.post('/registerDriver/:id', (req, res) => {
   let registrar = req.body
   // console.log(req.body)
   let add_num = registrar.add_number;
@@ -119,7 +184,7 @@ app.post('/registerDriver', (req, res) => {
           latitude = response.data.results[0].geometry.location.lat;
           longitude = response.data.results[0].geometry.location.lng;
           
-          queryString = `insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code, latitude, longitude) values (${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code}, ${latitude}, ${longitude});`
+          queryString = `insert into userInfo(userid, day_id, name, status, no_of_passengers, add_number, address, zip_code, latitude, longitude) values (${registrar.userId}, ${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code}, ${latitude}, ${longitude});`
           db.query(queryString, (err, data) => {
               if(err){
                 res.send(err)
@@ -131,15 +196,50 @@ app.post('/registerDriver', (req, res) => {
 })
 
 
-app.post('/registerPassenger', (req, res) => {
+app.post('/registerPassenger/:id', (req, res) => {
     let registrar = req.body
-    queryString = `insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code});`
-    db.query(queryString, (err, data) => {
-        if(err){
-            res.send(err)
-        } else {
-            res.send(req.body)
-        }
+    let add_num = registrar.add_number;
+    let address = registrar.address;
+    let zipCode = registrar.zip_code;
+    let latitude;
+    let longitude;
+    let distances = [];
+
+    let drivers = registrar.usersArray[0];
+    
+
+    //gets coordinates from inputted address
+    let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${add_num}+${address},+${zipCode}&key=${config.geocodeAPI_Key}`
+    Axios.get(url)
+    .then((response) => {
+        // console.log(response.data.results[0].geometry.location);
+        // res.send(response.data.results[0].geometry.location)
+        latitude = response.data.results[0].geometry.location.lat;
+        longitude = response.data.results[0].geometry.location.lng;
+
+        queryString = `insert into userInfo(userid, day_id, name, status, no_of_passengers, add_number, address, zip_code, latitude, longitude) values (${registrar.userId}, ${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code}, ${latitude}, ${longitude});`
+        db.query(queryString, (err, data) => {
+            if(err){
+              res.send(err)
+            } else {
+              console.log('passenger inserted into db.')
+              res.send('passenger inserted into db.')
+            }
+        })
+
+        // drivers.forEach( driver => {
+        //   let distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${latitude},${longitude}&destinations=${driver.latitude},${driver.longitude}&key=${config.geocodeAPI_Key}`
+        //   Axios.get(distanceUrl)
+        //     .then( response => {
+        //       console.log('response: ', response)
+        //       // distances.push(response.data.rows[0].elements[0].distance.value)
+        //     })
+        //     .catch( error => {
+        //       console.log(error);
+        //     })
+        // })
+        // console.log('distances from /registerpassenger: ', distances)
+        // res.send('loop complete')
     })
 })
 
