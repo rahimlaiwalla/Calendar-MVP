@@ -1,9 +1,13 @@
+require('dotenv').config();
+
+const Twilio = require('twilio')
 const express  = require('express');
 const bodyparser = require('body-parser');
 const db = require('../database/index.js');
 const config = require('../config.js')
 const cors = require('cors');
 const Axios = require('axios');
+const Chance = require('chance')
 
 const PORT = 3131;
 
@@ -13,7 +17,33 @@ app.use(bodyparser());
 
 app.use(cors());
 
-app.use(express.static(__dirname + '/../client/dist'));
+app.use(express.static(__dirname + '/../dist'));
+
+const AccessToken = Twilio.jwt.AccessToken
+const ChatGrant = AccessToken.ChatGrant
+const chance = new Chance()
+
+app.get('/token/:id', function (req, res) {
+  //create token object with account info to project
+  const token = new AccessToken(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_API_KEY,
+    process.env.TWILIO_API_SECRET,
+  )
+  //give the token an name (can use username of chatter, instead of random)
+  token.identity = req.params.id;
+  // token.identity = chance.name();
+  //add chat grant to token
+  token.addGrant(new ChatGrant({
+    serviceSid: process.env.TWILIO_CHAT_SERVICE_SID
+  }))
+  //return JSON object back to client
+  res.send({
+    identity: token.identity,
+    token: token.toJwt()
+  })
+})
+
 
 app.get('/events/:id', (req, res) => {
     let id = 1;
@@ -88,6 +118,22 @@ app.get('/messages/:id/:driverName', (req, res) => {
     } else {
       console.log('data from messages query: ', data.rows)
       res.send(data.rows);
+    }
+  })
+})
+
+app.post('/insertMessage/:id/:driverName', (req, res) => {
+  db.query(`insert into messages(day_id, driver_username, message) values (${req.params.id}, '${req.params.driverName}', '${req.body.message}')`, (err, data) => {
+    if(err){
+      res.send(err);
+    } else {
+      db.query(`select message from messages where day_id = ${req.params.id} and driver_username = '${req.params.driverName}'`, (err, data) => {
+        if(err){
+          res.send(err);
+        } else {
+          res.send(data.rows);
+        }
+      })
     }
   })
 })
