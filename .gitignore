@@ -5,3 +5,5 @@ config.js
 .env
 
 .DS_Store
+
+google_geocode api.txt
