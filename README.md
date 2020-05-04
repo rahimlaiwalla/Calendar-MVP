@@ -13,13 +13,15 @@ Create a copy of the .env.example file, save it it as .env, and enter your Twili
 
 ## Usage
 
+**Install Node Package Manager**
+
 From within the root directory:
 
 ```bash
 npm install
 ```
 
-Create PostgreSQL database
+**Create PostgreSQL database**
 
 _I am currently in progress of building an automatic database seeding script, so please follow the manual instructions below:_
 
@@ -29,13 +31,12 @@ _I am currently in progress of building an automatic database seeding script, so
 
   1. Please copy and paste the contents of the entire schema.sql file into your PostgreSQL Interactive Terminal, psql.
 
-
- Start server on port 3131
+**Start server on port 3131**
  ```bash
  npm start
  ```
 
-Run webpack to build main.js file
+**Run webpack to build main.js file**
  ```bash
  npm run dev-react
  ```
