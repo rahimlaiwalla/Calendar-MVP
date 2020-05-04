@@ -7,3 +7,5 @@ config.js
 .DS_Store
 
 google_geocode api.txt
+
+geocode_notes.txt
