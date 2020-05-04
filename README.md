@@ -19,17 +19,15 @@ From within the root directory:
 npm install
 ```
 
-Seed a PostgreSQL database:
+Create PostgreSQL database
 
-* if your PostgresSQL database is not password protected, please run the following command:
+_I am currently in progress of building an automatic database seeding script, so please follow the manual instructions below:_
 
-```bash
-npm run db
-```
+  1. Enter into the schema.sql file.
+  
+  1. Scroll down to the copy commands and please change the path of the files to the file path in your directory.
 
-* if your PostgreSQL database requires a password:
-
-  please irgnore the base command above, and copy and paste the contents of the schema.sql file into psql
+  1. Please copy and paste the contents of the entire schema.sql file into your PostgreSQL Interactive Terminal, psql.
 
 
  Start server on port 3131
