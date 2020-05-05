@@ -1,7 +1,9 @@
+const { username } = require('../config.js')
+
 const { Client}  = require('pg');
 
 const client = new Client({
-  user: 'rahimlaiwalla',
+  user: username,
   host: 'localhost',
   database: 'ride_share_calendar',
   password: '',

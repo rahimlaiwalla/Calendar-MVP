@@ -70,11 +70,6 @@ FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/december.csv' DEL
 COPY january(day, event_name)
 FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/january.csv' DELIMITER ',' CSV;
 
-
--- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'Rahim Laiwalla', 'driver', 3, 543, 'Howard St.', 94105);
--- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN2 LN2', 'passenger', null, 543, 'Howard St.', 94105);
--- insert into userInfo(day_id, name, status, no_of_passengers, add_number, address, zip_code) values (3, 'FN3 LN3', 'passenger', null, 44, 'Tehama.', 94105);
-
 insert into login (username, password) values ('User1', 'User1');
 insert into login (username, password) values ('User2', 'User2');
 insert into login (username, password) values ('User3', 'User3');

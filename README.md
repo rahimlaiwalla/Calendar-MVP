@@ -7,9 +7,9 @@ Sign up for a google maps API account and copy your API key
 
 Create a copy of the config.example.js file, save it as config.js, and enter your key as a string
 
-Sign up for a [Twilio account] (https://www.twilio.com/docs/chat/javascript/quickstart), and gather account information according the the link.
+Sign up for a [Twilio account](https://www.twilio.com/docs/chat/javascript/quickstart), and gather account information according the the link.
 
-Create a copy of the .env.example file, save it it as .env, and enter your Twilio API keys
+Create a copy of the .env.example file, save it as .env, and enter your Twilio API keys
 
 ## Usage
 
@@ -23,13 +23,15 @@ npm install
 
 **Create PostgreSQL database**
 
-_I am currently in progress of building an automatic database seeding script, so please follow the manual instructions below:_
+_I am currently in procress of building an automatic database seeding script, so please follow the manual instructions below:_
 
   1. Enter into the schema.sql file.
   
-  1. Scroll down to the copy commands and please change the path of the files to the file path in your directory.
+  1. Scroll down to the copy commands, and please change the path of the files to the respective csv file paths in your directory.
 
   1. Please copy and paste the contents of the entire schema.sql file into your PostgreSQL Interactive Terminal, psql.
+
+  1. Please change the postgres_username key in the config.js file to your psql username.
 
 **Start server on port 3131**
  ```bash

@@ -1,3 +1,4 @@
 module.exports = {
-  geocodeAPI_Key: '**************************************'
+  geocodeAPI_Key: '**************************************',
+  postgres_username: '********'
 }
