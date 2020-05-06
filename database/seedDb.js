@@ -3,17 +3,77 @@ const path = require('path');
 const fs = require('fs');
 
 
-function copyMonthsFunc() {
+function insertUsersFunc() {
+  
+  return new Promise((res, rej) => {
+    //insert users into login table
+      let users = [
+        'User1',
+        'User2',
+        'User3',
+        'User4',
+        'User5',
+        'User6',
+        'User7',
+        'User8'
+        ];
+    
+    
+
+
+    for(let i = 0; i < users.length; i++){
+      if(i < users.length - 1){
+      let queryString = `insert into login (username, password) values ('${users[i]}', '${users[i]}');`;
+      db.query(queryString, (err, data) => {
+        if(err){
+          rej(console.log(err));
+        } else {
+          console.log(data.command, users[i]);
+        }
+      })
+      } else if (i === users.length - 1){
+        let queryString = `insert into login (username, password) values ('${users[i]}', '${users[i]}');`;
+        db.query(queryString, (err, data) => {
+          if(err){
+            rej(console.log(err));
+          } else {
+            console.log(data.command, users[i]);
+            res('users inserted')
+          }
+        })
+      }
+    }
+  });
+}
+
+function copyLocationFunc(value){
+
+  return new Promise((res, rej) => {
+    //copy locations_and_times csv file
+    const locationFilesPath = path.join(__dirname, '../csv files/locations_and_times.csv');
+
+    const insertLocationFilesPath = `COPY locations_and_times(location_name, location_address, location_city, location_state, location_zip, weekday_start_time, friday_start_time, weekend_start_time) FROM '${locationFilesPath}' DELIMITER ',' CSV`;
+    
+    db.query(insertLocationFilesPath, (err, data) => {
+      if(err){
+        rej(console.log(err));
+      } else {
+        console.log(data.command, 'locations_and_times');
+        res('locations and times inserted after ' + value)
+      }
+    })
+  });
+} 
+
+function readCsvFileFunc(value) {
  
   return new Promise((resolve, reject) => {
 
     const csvDir = path.join(__dirname, '../csv files')
   
   
-    //array of file paths to loop over to query the copy comman
-  
     let relativeCsvPaths;
-    let monthFilesObj = {};
+    let monthFilesArray = [];
   
     let months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
   
@@ -26,12 +86,15 @@ function copyMonthsFunc() {
         relativeCsvPaths.forEach((fileName) => {
           let fileTitle = fileName.substring(0, fileName.length - 4);
           if(months.includes(fileTitle)){
+            let obj = {}
             let stringPath = '../csv files/' + fileName;
-            monthFilesObj[fileTitle] = path.join(__dirname, stringPath);
+            obj.month = fileTitle
+            obj.file_path = path.join(__dirname, stringPath);
+            monthFilesArray.push(obj);
           }
         })
-        console.log('monthFilesObj: ', monthFilesObj);
-        resolve(monthFilesObj);
+        // console.log('monthFilesArray: ', monthFilesArray);
+        resolve(monthFilesArray);
         
       }
     })
@@ -39,99 +102,65 @@ function copyMonthsFunc() {
         
 };
 
-function loopPromise(monthFilesObj){
+function copyMonths(monthFilesArray){
   return new Promise((res, rej) => {
-    function loop() {
-        for(let month in monthFilesObj){
-          const copyQuery = `COPY ${month}(day, event_name) FROM '${monthFilesObj[month]}' DELIMITER ',' CSV`;
-        
-          db.query(copyQuery, (err, data) => {
-            if(err){
-              rej(console.log('error'))
-            } else {
-              console.log(data.command, month);
-            }
-          })
-        }
-    };
-    res(loop())
+
+    for(let i = 0; i < monthFilesArray.length; i++){
+      if(i < monthFilesArray.length - 1){
+        let copyQuery = `COPY ${monthFilesArray[i].month}(day, event_name) FROM '${monthFilesArray[i].file_path}' DELIMITER ',' CSV`;
+      
+        db.query(copyQuery, (err, data) => {
+          if(err){
+            rej(console.log('error in copying months'))
+          } else {
+            console.log(data.command, monthFilesArray[i].month);
+          }
+        })
+      } else if ( i === monthFilesArray.length - 1){
+        let copyQuery = `COPY ${monthFilesArray[i].month}(day, event_name) FROM '${monthFilesArray[i].file_path}' DELIMITER ',' CSV`;
+      
+        db.query(copyQuery, (err, data) => {
+          if(err){
+            rej(console.log('error'))
+          } else {
+            console.log(data.command, monthFilesArray[i].month);
+            res('month csvs coppied into db')
+          }
+        })
+      }
+    }
   })
 }
 
 
   
-      // await asyncFunc
-  
-  function copyLocationFunc(){
 
-    return new Promise((res, rej) => {
-      //copy locations_and_times csv file
-      const locationFilesPath = path.join(__dirname, '../csv files/locations_and_times.csv');
-  
-      const insertLocationFilesPath = `COPY locations_and_times(location_name, location_address, location_city, location_state, location_zip, weekday_start_time, friday_start_time, weekend_start_time) FROM '${locationFilesPath}' DELIMITER ',' CSV`;
-      
-      db.query(insertLocationFilesPath, (err, data) => {
-        if(err){
-          rej(console.log(err));
-        } else {
-          res(console.log(data.command, 'locations_and_times'));
-        }
-      })
-    });
-  } 
-  
-  function insertUsersFunc() {
-    
-    let users = [
-      'User1',
-      'User2',
-      'User3',
-      'User4',
-      'User5',
-      'User6',
-      'User7',
-      'User8'
-      ];
-    return new Promise((res, rej) => {
-      //insert users into login table
-      
-      
-      function loopUser(users){
-
-        users.forEach(user => {
-          let queryString = `insert into login (username, password) values ('${user}', '${user}');`;
-          db.query(queryString, (err, data) => {
-            if(err){
-              rej(console.log(err));
-            } else {
-              console.log(data.command, user);
-            }
-          })
-        })
-      }
-      res(loopUser(users))
-    });
-  }
   
   
   
-  function disconnect() {
-
-
-        db.end(err => {
-          console.log('client has disconnected')
+  
+  
+  function disconnect(value) {
+    if(value){
+      db.end(err => {
         if (err) {
           console.log('error during disconnection', err.stack)
+        } else {
+          console.log('client disconnnected')
         }
       })
-
+    } else {
+      console.log('promised did not follow order')
+    }
   };
 
 
-    copyMonthsFunc().then(loopPromise).then(copyLocationFunc).then(insertUsersFunc)
-
   
-// let promiseArray = [copyMonthsFunc, loopPromise, copyLocationFunc, insertUsersFunc]
-
-// Promise.all(promiseArray).then(() => {console.log('promises done')}).then(disconnect)
+  
+insertUsersFunc()
+  .then((result) => copyLocationFunc(result))
+  .then((result) => readCsvFileFunc(result))
+  .then((result) => copyMonths(result))
+  .then((result) => disconnect(result))
+  .catch(() => {throw new Error('Error in promise flow')})
 
