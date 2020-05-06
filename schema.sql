@@ -56,25 +56,3 @@ CREATE TABLE userInfo (
     longitude FLOAT(53) NOT NULL,
     latitude FLOAT(53) NOT NULL
 );
-
-
-COPY locations_and_times(location_name, location_address, location_city, location_state, location_zip, weekday_start_time, friday_start_time, weekend_start_time)
-FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/locations_and_times.csv' DELIMITER ',' CSV;
-
-COPY november(day, event_name)
-FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/november.csv' DELIMITER ',' CSV;
-
-COPY december(day, event_name)
-FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/december.csv' DELIMITER ',' CSV;
-
-COPY january(day, event_name)
-FROM '/Users/rahimlaiwalla/Hack Reactor/Calendar-MVP/csv files/january.csv' DELIMITER ',' CSV;
-
-insert into login (username, password) values ('User1', 'User1');
-insert into login (username, password) values ('User2', 'User2');
-insert into login (username, password) values ('User3', 'User3');
-insert into login (username, password) values ('User4', 'User4');
-insert into login (username, password) values ('User5', 'User5');
-insert into login (username, password) values ('User6', 'User6');
-insert into login (username, password) values ('User7', 'User7');
-insert into login (username, password) values ('User8', 'User8');

@@ -1,13 +1,13 @@
-const { username } = require('../config.js')
+const { username, password, host, port } = require('../config.js')
 
 const { Client}  = require('pg');
 
-const client = new Client({
+let client = new Client({
   user: username,
-  host: 'localhost',
+  host: host,
   database: 'ride_share_calendar',
-  password: '',
-  port: 5432,
+  password: password,
+  port: port,
 });
 
 client.connect((err) => {

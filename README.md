@@ -5,13 +5,21 @@ Calendar-MVP is a service that is meant to solve unorganized carpooling and mayh
 
 Sign up for a google maps API account and copy your API key
 
-Create a copy of the config.example.js file, save it as config.js, and enter your key as a string
+Create a copy of the config.example.js file, save it as config.js, and assing your key, as a string, to geocodeAPI_Key.
 
-Sign up for a [Twilio account](https://www.twilio.com/docs/chat/javascript/quickstart), and gather account information according the the link.
+Sign up for a Twilio account, and gather account information according to this [link](https://www.twilio.com/docs/chat/javascript/quickstart).
 
-Create a copy of the .env.example file, save it as .env, and enter your Twilio API keys
+Create a copy of the .env.example file, save it as .env, and replace each asterisk placeholders with the appropriate Twilio API keys.
 
 ## Usage
+
+**Check the schema script, and adjust if necessary**
+
+1. Enter the package.json file
+
+1. scroll to the "schema" key in the script sections of the file.
+
+1. adjust the psql command according to how you connect to your postgreSQL database.
 
 **Install Node Package Manager**
 
@@ -23,15 +31,24 @@ npm install
 
 **Create PostgreSQL database**
 
-_I am currently in procress of building an automatic database seeding script, so please follow the manual instructions below:_
+1. In the config.js file:
+  1. Replace the username key with your psql user information.
+  1. If your psql connection requires a password, replace the password key with your psql password. If you do not use a password, do nothing.
+  1. Replace the host key with your host name. 
+  1. The port number is set to the default PostgreSQL server port: 5432. If your port differs from 5432, replace the port key with your PostgreSQL server port number.
 
-  1. Enter into the schema.sql file.
-  
-  1. Scroll down to the copy commands, and please change the path of the files to the respective csv file paths in your directory.
+1. Build the PostgreSQL database schema
 
-  1. Please copy and paste the contents of the entire schema.sql file into your PostgreSQL Interactive Terminal, psql.
+```bash
+npm run schema
+```
 
-  1. Please change the postgres_username key in the config.js file to your psql username.
+1. Seed the database
+
+```bash
+npm run seed_db
+```
+
 
 **Start server on port 3131**
  ```bash
@@ -45,6 +62,6 @@ _I am currently in procress of building an automatic database seeding script, so
  
 ## User Notes
 
-When the application is served, you will come to a Log In page. Right now 8 users are set up from User1 to User8 (please note that there is no space betweer 'User' and the number)
+When the application is served, you will come to a Log In page. Right now 8 users are set up from User1 to User8 (please note that there is no space between 'User' and the number)
 
 Log in with one of the eight usernames only. No password is required at this time to enter the application.
