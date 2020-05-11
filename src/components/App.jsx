@@ -60,11 +60,14 @@ class App extends React.Component {
     //         })
     // }
 
-    //getEvents using id in api
+    //getEvents using id in url - id is the user id, in order to create specific routes for specific users
+    //this function gets an array of events in november, and then sets the array to state
     getEvents() {
       Axios.get(`/events/${this.state.userId}`)
           .then((response) => {
-              this.setState({events: response.data});
+              this.setState({events: response.data}, () => {
+                console.log('state events in apps.jsx: ', this.state.events)
+              });
           })
   }
 
@@ -83,7 +86,7 @@ class App extends React.Component {
             Axios.post('/riders', {day_id: this.state.singleEvent.id})
             .then((response) => {
                 this.setState({singleEventUsersArray: response.data.array, singleEventGroupArray: response.data.groups}, () => {
-                    // console.log('STATE Group ARRAY', this.state.singleEventGroupArray)
+                    console.log('STATE Group ARRAY', this.state.singleEventGroupArray)
                 })
             })
         }

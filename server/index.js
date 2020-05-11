@@ -23,6 +23,7 @@ const AccessToken = Twilio.jwt.AccessToken
 const ChatGrant = AccessToken.ChatGrant
 const chance = new Chance()
 
+//Twilio Chat Route
 app.get('/token/:id', function (req, res) {
   //create token object with account info to project
   const token = new AccessToken(
@@ -44,66 +45,151 @@ app.get('/token/:id', function (req, res) {
   })
 })
 
-
+//get event information for each day in november
 app.get('/events/:id', (req, res) => {
+    let monthsArray = ['november', 'december', 'january']
+    //id in route, above, is user id, to show user id url
+    //what is this id, below, for?
     let id = 1;
     const locationInfo = {};
-    let novemberArray = [];
+    //should I place this array in the query selecting from the month, in order to create more arrays for more months?
+    //or should I have this be a general array that the calendar can parse through
+    let eventsArray = [];
     db.query(`select * from locations_and_times where location_zip = '${94501}'`, (err, data) => {
-       if(err){
-           res.send(err)
-       } else {
+      if(err){
+        res.send(err)
+      } else {
         //  console.log('/events data.rows: ', data.rows);
         locationInfo.weekday = data.rows[0].weekday_start_time;
         locationInfo.friday = data.rows[0].friday_start_time;
         locationInfo.weekend = data.rows[0].weekend_start_time;
         // console.log('LOCATION INFO: ', locationInfo)
-        db.query('select * from november', (err, data) => {
-            if(err){
-                res.send(err)
-            } else {
-                let november = data.rows;
-                // console.log('NOVEMBER: ', november)
-                // let novemberArray = [];
-                november.forEach( (novemberDay) => {
-                    // console.log('DAY.EVENT_NAME: ', novemberDay.event_name)
-                    if(novemberDay.event_name !== 'null') {
-                        let dayObj = {};
-                        dayObj.id = id;
-                        dayObj.title = novemberDay.event_name;
-                        let year = 2019;
-                        let month = 10;
-                        let day = novemberDay.day;
-                        let time = '';
-                        if(new Date(year, month, day).getDay() < 5){
-                            time = locationInfo.weekday;
-                        } else if(new Date(year, month, day).getDay() === 5){
-                            time = locationInfo.friday;
-                        } else if(new Date(year, month, day).getDay() > 5){
-                            time = locationInfo.weekend
-                        }
-                        let meridiem = time.substring(5, 7);
-                        let hour = 0;
-                        if(meridiem === 'pm'){
-                            hour = +time.substring(0, 1) + 12;
-                        } else {
-                            hour = +time.substring(0, 1)
-                        }
-                        let minute = +time.substring(2, 4);
+        
+        let year = 2019;
+        let month = 10;
 
-                        let start = new Date(year, month, day, hour, minute, 0);
-                        dayObj.start = start;
-                        dayObj.end = new Date(year, month, day, hour+2, minute, 0);
-                        dayObj.allDay = false;
-                        novemberArray.push(dayObj);
+//////////////////////PLACE FOR LOOP HERE TO LOOP THROUGH ALL MONTHS///////////////////////////////////////
+/* This code needs to be changed to async await */
+        for(let i = 0; i < monthsArray.length; i++){
+          // if(monthsArray[i] === 'january'){
+          //   year++;
+          //   month = 0;
+          // }
+          if(i < monthsArray.length - 1){
+            db.query(`select * from ${monthsArray[i]}`, (err, data) => {
+              if(err){
+                  res.send(err)
+              } else {
+                  console.log(monthsArray[i])
+                  let monthData = data.rows;
+                  // console.log('monthData: ', monthData)
+                  // let eventsArray = [];
+                  monthData.forEach( (dayOfMonth) => {
+                      // console.log('day of month: ', dayOfMonth)
+                      if(dayOfMonth.event_name !== 'null') {
+                          let dayObj = {};
+                          //id variable from above is being assigned here to identify event information for the first event in november
+                            //I should make this more specific, ex: 11_2019_1
+                          dayObj.id = id;
+                          dayObj.title = dayOfMonth.event_name;
+                          //maybe move year and month outside the scope, in order to alter them when year and month changes
+                          let day = dayOfMonth.day;
+                          // console.log('day: ', day)
+                          let time = '';
+                          if(new Date(year, month, day).getDay() < 5){
+                              time = locationInfo.weekday;
+                          } else if(new Date(year, month, day).getDay() === 5){
+                              time = locationInfo.friday;
+                          } else if(new Date(year, month, day).getDay() > 5){
+                              time = locationInfo.weekend
+                          }
+                          let meridiem = time.substring(5, 7);
+                          let hour = 0;
+                          if(meridiem === 'pm'){
+                              hour = +time.substring(0, 1) + 12;
+                          } else {
+                              hour = +time.substring(0, 1)
+                          }
+                          let minute = +time.substring(2, 4);
+
+                          let start = new Date(year, month, day, hour, minute, 0);
+                          // console.log('start: ', start)
+                          dayObj.start = start;
+                          dayObj.end = new Date(year, month, day, hour+2, minute, 0);
+                          dayObj.allDay = false;
+                          eventsArray.push(dayObj);
+                      }
+                      id = id + 1;
+                      
+                    })
+                    if(month === 11){
+                      month = 0;
+                      year = year + 1;
+                    } else {
+                      month = month + 1
                     }
-                    id = id + 1;
-                })
-            }
-            // console.log('NOVEMBER ARRAY: ', novemberArray)
-            // console.log('NOVEMBER OBJ: ', novemberObj);
-            res.send(novemberArray)
-        })
+                    console.log('month: ', month)
+                }
+            })
+          } else if (i === monthsArray.length - 1){
+            db.query(`select * from ${monthsArray[i]}`, (err, data) => {
+              if(err){
+                  res.send(err)
+              } else {
+                console.log(monthsArray[i])
+                  let monthData = data.rows;
+                  // console.log('monthData: ', monthData)
+                  // let eventsArray = [];
+                  monthData.forEach( (dayOfMonth) => {
+                      // console.log('day of month: ', dayOfMonth)
+                      if(dayOfMonth.event_name !== 'null') {
+                          let dayObj = {};
+                          //id variable from above is being assigned here to identify event information for the first event in november
+                            //I should make this more specific, ex: 11_2019_1
+                          dayObj.id = id;
+                          dayObj.title = dayOfMonth.event_name;
+                          //maybe move year and month outside the scope, in order to alter them when year and month changes
+                          let day = dayOfMonth.day;
+                          // console.log('day: ', day)
+                          let time = '';
+                          if(new Date(year, month, day).getDay() < 5){
+                              time = locationInfo.weekday;
+                          } else if(new Date(year, month, day).getDay() === 5){
+                              time = locationInfo.friday;
+                          } else if(new Date(year, month, day).getDay() > 5){
+                              time = locationInfo.weekend
+                          }
+                          let meridiem = time.substring(5, 7);
+                          let hour = 0;
+                          if(meridiem === 'pm'){
+                              hour = +time.substring(0, 1) + 12;
+                          } else {
+                              hour = +time.substring(0, 1)
+                          }
+                          let minute = +time.substring(2, 4);
+
+                          let start = new Date(year, month, day, hour, minute, 0);
+                          // console.log('start: ', start)
+                          dayObj.start = start;
+                          dayObj.end = new Date(year, month, day, hour+2, minute, 0);
+                          dayObj.allDay = false;
+                          eventsArray.push(dayObj);
+                      }
+                      id = id + 1;
+                      
+                      
+                    })
+                    if(month === 11){
+                      month = 0;
+                      year = year + 1;
+                    } else {
+                      month = month + 1
+                    }                    console.log('month: ', month)
+                    res.send(eventsArray)
+                }
+            })
+          }
+        }
       }
     })
 });
@@ -168,12 +254,13 @@ app.post('/login', (req, res) => {
 
 app.post('/riders', (req, res) => {
     // console.log(req.body)
+    //get all users registered as drivers or passengers on specific day
     db.query(`select * from userInfo where day_id = ${req.body.day_id}`, (err, data) => {
         if(err){
             res.send(err)
         } else {
             let array = [[], []];
-            
+            //sort drivers into array in 0 index, and passengers into the array in the 1 index
             data.rows.forEach((user) =>{
                 if(user.status === 'driver'){
                     array[0].push(user);
@@ -182,35 +269,85 @@ app.post('/riders', (req, res) => {
                     array[1].push(user);
                 }
             })
-            console.log('data.rows: ', data.rows)
-            console.log('Array from /riders: ', array)
+            // console.log('data.rows: ', data.rows)
+            // console.log('Array from /riders: ', array)
             // place passengers in driver groups and make drivers groups
             let groups = [];
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            //now, need to organize cars by placing passengers into groups with a driver
+            //loop through drivers and create groups organized by drivers. will produce array of objects
             array[0].forEach( driver => {
               let group = {};
               group['driver'] = driver;
               group['passenger'] = [];
               groups.push(group);
             })
-            if(groups.length > 0){
-              let j = 0;
-              for(let i = 0; i < array[1].length; i++){
-                if(j === groups.length - 1){
-                  groups[j].passenger.push(array[1][i]);
-                  j = 0;
-                } else {
-                  groups[j].passenger.push(array[1][i]);
-                  j++;
+            // console.log('groups in /riders: ', groups);
+
+            //for each passenger, I want to compare each passenger distance to each driver, find the smallest distance, and assign passenger to driver
+            //loop through passenger array array[1]
+
+            if(array[1].length > 0){
+              array[1].forEach( passenger => {
+                //assign distance array to variable
+                let distances = [];
+                //loop through group
+                //query passenger lat and long to driver (group[i].driver) lat and long, and push into array. (the for loop from registerpassenger/:id route)
+
+                async function getDistances(groups, passenger){
+                  for(let i = 0; i < groups.length; i++){
+                    console.log('i: ', i)
+                    //await distanceInLoop call
+                    let stop = groups.length - 1
+                    function distanceInLoop(group, passenger, i, stop){
+                      let distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${passenger.latitude},${passenger.longitude}&destinations=${group.driver.latitude},${group.driver.longitude}&units=imperial&key=${config.geocodeAPI_Key}`
+                      Axios.get(distanceUrl)
+                        .then( response => {
+                          let distance = response.data.rows[0].elements[0].distance.text;
+                          console.log(`typeof distance from passenger to driver ${i}: ${typeof(distance.substring(0, distance.length - 3))}`);
+                          distances.push(+(distance.substring(0, distance.length - 3)));
+                          if(i === stop){
+                          console.log('distances: ', distances);
+                          //find index of smallest value in the distance array
+                          let minIndex = distances.indexOf(Math.min(...distances));
+                          console.log('minIndex: ', minIndex)
+                          //insert passenger information into passenger array in group at the same index as min index
+                          //push passenger into passenger array (group[i].passenger) of group at the index = index from distance array
+                          groups[minIndex].passenger.push(passenger);
+                          console.log('groups no. 2: ', groups)
+                          let sendObj = {array: array, groups: groups};
+                          console.log('SENDOBJ: ', sendObj);
+                          return (res.send(sendObj));
+                          
+                        } else {
+
+                          return;                    
+                        }
+                      })
+                      .catch( error => {
+                        return error;
+                      })
+                    }
+                    
+                    await distanceInLoop(groups[i], passenger, i, stop);
+                  }
+                  // add return statement here somehow, currently this is not asynchronously being called
+                  // console.log('return')
+                  // return;
                 }
-              }
-            }
-            
+
+                getDistances(groups, passenger);
+              })
+           } else {
             let sendObj = {array: array, groups: groups};
             console.log('SENDOBJ: ', sendObj);
-            res.send(sendObj);
+            res.send(sendObj);           
+           }
+
         }
     })
-})
+});
 
 app.post('/registerDriver/:id', (req, res) => {
   let registrar = req.body
@@ -252,6 +389,7 @@ app.post('/registerPassenger/:id', (req, res) => {
     let distances = [];
 
     let drivers = registrar.usersArray[0];
+    console.log('driver: ', drivers)
     
 
     //gets coordinates from inputted address
@@ -263,6 +401,7 @@ app.post('/registerPassenger/:id', (req, res) => {
         latitude = response.data.results[0].geometry.location.lat;
         longitude = response.data.results[0].geometry.location.lng;
 
+        //insert passenger info into database
         queryString = `insert into userInfo(userid, day_id, name, status, no_of_passengers, add_number, address, zip_code, latitude, longitude) values (${registrar.userId}, ${registrar.day_id}, '${registrar.name}', '${registrar.driver}', ${registrar.passengers}, ${registrar.add_number}, '${registrar.address}', ${registrar.zip_code}, ${latitude}, ${longitude});`
         db.query(queryString, (err, data) => {
             if(err){
@@ -272,20 +411,36 @@ app.post('/registerPassenger/:id', (req, res) => {
               res.send('passenger inserted into db.')
             }
         })
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // drivers.forEach( driver => {
-        //   let distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${latitude},${longitude}&destinations=${driver.latitude},${driver.longitude}&key=${config.geocodeAPI_Key}`
-        //   Axios.get(distanceUrl)
-        //     .then( response => {
-        //       console.log('response: ', response)
-        //       // distances.push(response.data.rows[0].elements[0].distance.value)
-        //     })
-        //     .catch( error => {
-        //       console.log(error);
-        //     })
-        // })
-        // console.log('distances from /registerpassenger: ', distances)
-        // res.send('loop complete')
+          // for(let i = 0; i < drivers.length; i++){
+          //   if( i < drivers.length - 1){
+          //     let distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${latitude},${longitude}&destinations=${drivers[i].latitude},${drivers[i].longitude}&units=imperial&key=${config.geocodeAPI_Key}`
+          //     Axios.get(distanceUrl)
+          //       .then( response => {
+          //         console.log(`distance from passenger to driver ${i}: ${response.data.rows[0].elements[0].distance.text}`)
+          //         distances.push(response.data.rows[0].elements[0].distance.text)
+          //       })
+          //       .catch( error => {
+          //         console.log(error);
+          //       })
+          //   } else if (i === drivers.length - 1){
+          //     let distanceUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${latitude},${longitude}&destinations=${drivers[i].latitude},${drivers[i].longitude}&units=imperial&key=${config.geocodeAPI_Key}`
+          //     Axios.get(distanceUrl)
+          //       .then( response => {
+          //         console.log(`distance from passenger to driver ${i}: ${response.data.rows[0].elements[0].distance.text}`)
+          //         distances.push(response.data.rows[0].elements[0].distance.text)
+          //         console.log(distances);
+          //         res.send(distances);
+          //       })
+          //       .catch( error => {
+          //         console.log(error);
+          //       })
+          //   }
+          // }
+ 
+
+ /////////////////////////////////////////////////////////////////////////////////////////////////       
     })
 })
 

@@ -44,7 +44,8 @@ function insertUsersFunc() {
       }
     }
   });
-}
+};
+
 
 function copyLocationFunc(value){
 
@@ -63,7 +64,8 @@ function copyLocationFunc(value){
       }
     })
   });
-} 
+}; 
+
 
 function readCsvFileFunc(value) {
  
@@ -102,6 +104,7 @@ function readCsvFileFunc(value) {
         
 };
 
+
 function copyMonths(monthFilesArray){
   return new Promise((res, rej) => {
 
@@ -130,29 +133,22 @@ function copyMonths(monthFilesArray){
       }
     }
   })
-}
+};
 
 
-  
-
-  
-  
-  
-  
-  
-  function disconnect(value) {
-    if(value){
-      db.end(err => {
-        if (err) {
-          console.log('error during disconnection', err.stack)
-        } else {
-          console.log('client disconnnected')
-        }
-      })
-    } else {
-      console.log('promised did not follow order')
-    }
-  };
+function disconnect(value) {
+  if(value){
+    db.end(err => {
+      if (err) {
+        console.log('error during disconnection', err.stack)
+      } else {
+        console.log('client disconnnected')
+      }
+    })
+  } else {
+    return 'promised did not follow order';
+  }
+};
 
 
   
